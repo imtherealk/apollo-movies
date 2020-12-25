@@ -9,16 +9,19 @@ import Movie from "../components/Movie";
 const GET_MOVIE = gql`
   query getMovie($id: Int!) {
     movie(id: $id) {
+      id
       title
       medium_cover_image
       description_intro
       language
       rating
       genres
+      isLiked @client
     }
     suggestions(id: $id) {
       id
       medium_cover_image
+      isLiked @client
     }
   }
 `;
@@ -95,13 +98,17 @@ const Genre = styled.li`
 export default () => {
   const { id } = useParams();
   const { loading, data } = useQuery(GET_MOVIE, {
-    variables: { id: +id },
+    variables: { id: parseInt(id) },
   });
 
   return (
     <Container>
       <Column>
-        <Title>{loading ? "Loading..." : data.movie.title}</Title>
+        <Title>
+          {loading
+            ? "Loading..."
+            : `${data.movie.title} ${data.movie.isLiked ? ":)" : ":("}`}
+        </Title>
         <Subtitle>
           {data?.movie?.language} · {data?.movie?.rating}
         </Subtitle>
@@ -119,6 +126,7 @@ export default () => {
             <Movie
               key={movie.id}
               id={movie.id}
+              isLiked={movie.isLiked}
               bg={movie.medium_cover_image}
             ></Movie>
           ))}
